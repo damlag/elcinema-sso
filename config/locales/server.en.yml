@@ -1,0 +1,3 @@
+en:
+  site_settings:
+    remote_sso_enabled: "Enable remote sso from elcinema-web?"
