@@ -65,7 +65,8 @@ after_initialize do
   add_to_class(:session_controller, :destroy) do
     reset_session
     log_off_user
-    cookies.delete(TOKEN_COOKIE)
+    cookies.delete("_t")
+    cookies.delete("_t", domain: :all)
     if request.xhr?
       render nothing: true
     else
