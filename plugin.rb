@@ -11,7 +11,7 @@ after_initialize do
   Discourse::Application.routes.append do
     get "session/elcinema_sso" => "session#elcinema_sso"
     get "session/elcinema_sso_login" => "session#elcinema_sso_login"
-    delete "sessions/:id" => "session#elcinema_sso_logout", constraints:  {:id=>/[\w.\-]+/} if SiteSetting.enable_sso
+    delete "session/:id" => "session#elcinema_sso_logout", constraints:  {:id=>/[\w.\-]+/} if SiteSetting.enable_sso
   end
 
   ::SessionController.skip_before_filter :check_xhr, only: ['sso', 'elcinema_sso', 'sso_login', 'elcinema_sso_login', 'become', 'sso_provider']
