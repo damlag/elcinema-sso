@@ -10,12 +10,13 @@ after_initialize do
 
   Discourse::Application.routes.append do
     get "session/elcinema_sso" => "session#elcinema_sso"
-    get "session/elcinema_sso_login" => "session#elcinema_sso_login"    
+    get "session/elcinema_sso_login" => "session#elcinema_sso_login"
   end
 
   ::SessionController.skip_before_filter :check_xhr, only: ['sso', 'elcinema_sso', 'sso_login', 'elcinema_sso_login', 'become', 'sso_provider']
 
   add_to_class(:session_controller, :elcinema_sso) do
+    cookies.delete('_t')
     if SiteSetting.enable_sso
       @url = DiscourseSingleSignOn.generate_url(params[:return_path])
       render :json => data = { url: @url }, :status => '200'
@@ -25,6 +26,7 @@ after_initialize do
   end
 
   add_to_class(:session_controller, :elcinema_sso_login) do
+    cookies.delete('_t')
     unless SiteSetting.enable_sso
       render nothing: true, status: 404
       return
@@ -47,18 +49,7 @@ after_initialize do
           log_on_user user
         end
 
-        # If it's not a relative URL check the host
-        # if return_path !~ /^\/[^\/]/
-        #   begin
-        #     uri = URI(return_path)
-        #     return_path = "/" unless uri.host == Discourse.current_hostname
-        #   rescue
-        #     return_path = "/"
-        #   end
-        # end
-
         render :json => user , :status => '200'
-        # redirect_to return_path
       else
         render text: I18n.t("sso.not_found"), status: 500
       end
