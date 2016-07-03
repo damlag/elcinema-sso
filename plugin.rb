@@ -11,12 +11,12 @@ after_initialize do
   Discourse::Application.routes.append do
     get "session/elcinema_sso" => "session#elcinema_sso"
     get "session/elcinema_sso_login" => "session#elcinema_sso_login"
+    delete "sessions/:id" => "session#elcinema_sso_logout", constraints:  {:id=>/[\w.\-]+/} if SiteSetting.enable_sso
   end
 
   ::SessionController.skip_before_filter :check_xhr, only: ['sso', 'elcinema_sso', 'sso_login', 'elcinema_sso_login', 'become', 'sso_provider']
 
   add_to_class(:session_controller, :elcinema_sso) do
-    cookies.delete('_t')
     if SiteSetting.enable_sso
       @url = DiscourseSingleSignOn.generate_url(params[:return_path])
       render :json => data = { url: @url }, :status => '200'
@@ -26,7 +26,6 @@ after_initialize do
   end
 
   add_to_class(:session_controller, :elcinema_sso_login) do
-    cookies.delete('_t')
     unless SiteSetting.enable_sso
       render nothing: true, status: 404
       return
@@ -61,6 +60,17 @@ after_initialize do
       Discourse.handle_exception(e, details)
 
       render text: I18n.t("sso.unknown_error"), status: 500
+    end
+  end
+
+  add_to_class(:session_controller, :elcinema_sso_logout) do
+    reset_session
+    log_off_user
+    cookies.delete(TOKEN_COOKIE)
+    if request.xhr?
+      render nothing: true
+    else
+      redirect_to (params[:return_url] || path("/"))
     end
   end
 end
