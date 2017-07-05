@@ -1,6 +1,6 @@
 # name: elcinema-sso
 # about: Support for remote sso in Discourse
-# version: 0.1
+# version: 0.2
 # authors: 'Mustafa Zain Eddin'
 # url: https://github.com/MZainDamlag/elcinema-sso
 
