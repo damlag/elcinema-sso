@@ -74,20 +74,4 @@ after_initialize do
     end
   end
 
-  add_to_class('Auth::DefaultCurrentUserProvider', :lookup_api_user) do |api_key_value, request|
-    if api_key = ApiKey.where(key: api_key_value).includes(:user).first
-      api_username = request["api_username"]
-
-      if api_key.allowed_ips.present? && !api_key.allowed_ips.any? { |ip| ip.include?(request.ip) }
-        Rails.logger.warn("[Unauthorized API Access] username: #{api_username}, IP address: #{request.ip}")
-        return nil
-      end
-
-      if api_key.user
-        api_key.user if !api_username || (api_key.user.username_lower == api_username.downcase)
-      elsif api_username
-        SingleSignOnRecord.find_by(external_username: api_username).user
-      end
-    end
-  end
 end
